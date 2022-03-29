@@ -1,0 +1,66 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using Dynamsoft
+@using Dynamsoft.DBR
+@inject IJSRuntime JS
+
+<div style="height:95%;width:95%;position:absolute;overflow:hidden;">
+    <div class="controls" style="height:25px;">
+      <button class="control-button" @onclick="Scan">Scan</button>
+      <button class="control-button" @onclick="LoadImage">Load Image</button>
+      <button class="control-button" @onclick="Save">Save</button>
+      <button class="control-button" @onclick="ReadBarcode">Read Barcode</button>
+    </div>
+     <div id="dwtcontrolContainer" style="width:100%;height:calc(100% - 25px);"></div>
+</div>
+
+@code{
+    private BarcodeReader reader = new BarcodeReader("t0068MgAAABZTSn2NdKeRAAJyT5O9gsgjgYZ/1e+4Ef/L1aSwQGD7CyJsmpTKOJCDz9oRhXdJtWc7sLAEA4iSVy8Y47xl12Y=;t0068UwAAAC7ZgQu/OGyijqv2SmDjibOUChPBe1sUKQ6JieKFFPtbV4rTnl65MLXV6LheAcrvHPpHbIVEllL81xs1jmlezWI=");
+    protected override async void OnInitialized()
+    {
+        await CreateDWT();
+    }
+
+    private async Task CreateDWT()
+    {
+        await JS.InvokeVoidAsync("CreateDWT");
+    }
+
+    private async Task Scan()
+    {
+        await JS.InvokeVoidAsync("Scan");
+    }
+
+    private async Task LoadImage()
+    {
+        await JS.InvokeVoidAsync("LoadImage");
+    }
+
+    private async Task Save()
+    {
+        await JS.InvokeVoidAsync("Save");
+    }
+
+    private async void ReadBarcode()
+    {
+        var base64 = await JS.InvokeAsync<String>("GetBase64OfSelected");
+        var results = reader.DecodeBase64String(base64, "");
+        MessageBox.Show("Found " + results.Length + " barcodes");
+    }
+
+    [JSInvokable]
+    public static void ServiceNotFound()
+    {
+        if (MessageBox.Show("Dynamsoft Service is not installed. Open the download link?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+        {
+            //https://stackoverflow.com/questions/58024/open-a-url-from-windows-forms
+            System.Diagnostics.ProcessStartInfo psInfo = new System.Diagnostics.ProcessStartInfo
+            {
+               FileName = "https://www.dynamsoft.com/web-twain/downloads/",
+               UseShellExecute = true
+            };
+            System.Diagnostics.Process.Start(psInfo);
+
+        }
+    }
+ }
