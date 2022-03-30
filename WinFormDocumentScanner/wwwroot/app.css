@@ -2,10 +2,6 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.controls-button {
-    height: 20px;
-}
-
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }

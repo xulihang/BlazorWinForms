@@ -1,34 +1,56 @@
 var DWObject = null;
 
 function CreateDWT() {
-    Dynamsoft.DWT.CreateDWTObjectEx({
-        WebTwainId: 'dwtcontrol'
-    },
-        function (obj) {
+    return new Promise(function (resolve, reject) {
+        var success = function (obj) {
             DWObject = obj;
             DWObject.Viewer.bind(document.getElementById('dwtcontrolContainer'));
             DWObject.Viewer.width = "100%";
             DWObject.Viewer.height = "100%";
             DWObject.SetViewMode(2, 2);
             DWObject.Viewer.show();
+            resolve(true);
+        };
+
+        var error = function (err) {
+            resolve(false);
+        };
+
+        Dynamsoft.DWT.CreateDWTObjectEx({
+            WebTwainId: 'dwtcontrol'
         },
-        function (err) {
-            console.log(err);
-        }
-    );
+            success,
+            error
+        );
+    })
 }
 
-function Scan() {
-    if (DWObject) {
-        DWObject.SelectSource(function () {
+function Scan(options) {
+    console.log("options: ");
+    console.log(options);
+    
+    return new Promise(function (resolve, reject) {
+        if (DWObject) {
+
+            DWObject.SelectSourceByIndex(options.selectedIndex);
+            DWObject.CloseSource();
             DWObject.OpenSource();
-            DWObject.AcquireImage();
-        },
-            function () {
-                console.log("SelectSource failed!");
+            DWObject.IfShowUI = options.showUI;
+            DWObject.PixelType = options.pixelType;
+            DWObject.Resolution = options.resolution;
+            
+            var OnAcquireImageSuccess = function () {
+                resolve(true);
             }
-        );
-    }
+            var OnAcquireImageError = function () {
+                resolve(false);
+            }
+            DWObject.AcquireImage(OnAcquireImageSuccess, OnAcquireImageError);
+        } else {
+            reject(false);
+        }
+    });
+    
 }
 
 function LoadImage() {
@@ -75,4 +97,13 @@ function GetBase64OfSelected() {
             error
         );
     })
+}
+
+function GetScannersList() {
+    var scanners = [];
+    var count = DWObject.SourceCount;
+    for (var i = 0; i < count; i++) {
+        scanners.push(DWObject.GetSourceNameItems(i));
+    }
+    return scanners;
 }

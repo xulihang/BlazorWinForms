@@ -14,25 +14,14 @@ namespace WinFormDocumentScanner
 {
     public partial class DocumentScanner : Form
     {
-        private BlazorWebView blazor;
         public DocumentScanner()
         {
             InitializeComponent();
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddBlazorWebView();
-            blazor = new BlazorWebView()
-            {
-                Dock = DockStyle.Fill,
-                HostPage = "wwwroot/index.html",
-                Services = serviceCollection.BuildServiceProvider(),
-            };
+            blazor.Services = serviceCollection.BuildServiceProvider();
+            blazor.HostPage = "wwwroot/index.html";
             blazor.RootComponents.Add<Scanner>("#app");
-            Controls.Add(blazor);
         }
-
-        public BlazorWebView GetBlazorWebView() { 
-            return blazor;
-        }
-
     }
 }
